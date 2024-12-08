@@ -58,6 +58,12 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>com.yizlan</groupId>
             <artifactId>gelato-canonical</artifactId>
             <version>${canonical.version}</version>
