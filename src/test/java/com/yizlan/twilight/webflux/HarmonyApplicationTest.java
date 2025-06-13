@@ -16,7 +16,6 @@
 
 package com.yizlan.twilight.webflux;
 
-import com.yizlan.gelato.canonical.protocol.TerResult;
 import com.yizlan.twilight.webflux.actuate.HealthController;
 import com.yizlan.twilight.webflux.advice.GlobalExceptionHandler;
 import com.yizlan.twilight.webflux.advice.GlobalResponseHandler;
@@ -72,7 +71,7 @@ public class HarmonyApplicationTest {
     private RequestedContentTypeResolver requestedContentTypeResolver;
 
     @Resource
-    private TerResult<String, String, Object> terResult;
+    private Result<Object> protocol;
 
     @Resource
     private HarmonyProperties harmonyProperties;
@@ -85,8 +84,8 @@ public class HarmonyApplicationTest {
         webClient = WebTestClient
                 .bindToController(homeController, accountController, bookController, healthController)
                 .controllerAdvice(new GlobalResponseHandler(serverCodecConfigurer.getWriters(),
-                        requestedContentTypeResolver,
-                        terResult, harmonyProperties), new GlobalExceptionHandler())
+                        requestedContentTypeResolver, protocol, harmonyProperties), new GlobalExceptionHandler()
+                )
                 .build();
     }
 

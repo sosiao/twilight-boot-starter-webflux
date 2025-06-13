@@ -44,14 +44,14 @@ import java.util.stream.Stream;
  * @author Zen Gershon
  * @since 1.0
  */
-public abstract class AbstractGlobalResponseBodyResultHandler<T extends Comparable<T> & Serializable,
-        U extends Comparable<U> & Serializable, S>  extends ResponseBodyResultHandler {
+public abstract class AbstractGlobalResponseBodyResultHandler<P extends TerResult<P, T, U, S>,
+        T extends Comparable<T> & Serializable, U extends Comparable<U> & Serializable, S>  extends ResponseBodyResultHandler {
 
     private static final MethodParameter METHOD_PARAMETER_OF_GLOBAL_RESULT;
 
     private final HarmonyProperties harmonyProperties;
 
-    protected final TerResult<T, U, S> terResult;
+    protected final P protocol;
 
     static {
         try {
@@ -63,19 +63,19 @@ public abstract class AbstractGlobalResponseBodyResultHandler<T extends Comparab
         }
     }
 
-    private static <T extends Comparable<T> & Serializable,
-            U extends Comparable<U> & Serializable, S> Mono<? extends TerResult<T, U, S>> methodForParameter() {
+    private static <P extends TerResult<P, T, U, S>, T extends Comparable<T> & Serializable,
+            U extends Comparable<U> & Serializable, S> Mono<? extends TerResult<P, T, U, S>> methodForParameter() {
         return null;
     }
 
     protected AbstractGlobalResponseBodyResultHandler(List<HttpMessageWriter<?>> writers,
                                                       RequestedContentTypeResolver resolver,
-                                                      TerResult<T, U, S> terResult,
+                                                      P protocol,
                                                       HarmonyProperties harmonyProperties) {
         super(writers,resolver);
-        Assert.notNull(terResult, "TerResult must not be null");
+        Assert.notNull(protocol, "Protocol must not be null");
         Assert.notNull(harmonyProperties, "HarmonyProperties must not be null");
-        this.terResult = terResult;
+        this.protocol = protocol;
         this.harmonyProperties = harmonyProperties;
     }
 
@@ -89,7 +89,7 @@ public abstract class AbstractGlobalResponseBodyResultHandler<T extends Comparab
         boolean intercept = emptyPackage || Stream.of(packages).anyMatch(p -> controllerType.getName().startsWith(p));
 
         Class<?> resultType = returnType.getParameterType();
-        return harmonyProperties.isEnabled() && intercept  && !TerResult.class.isAssignableFrom(resultType);
+        return harmonyProperties.isEnabled() && intercept  && !protocol.getClass().isAssignableFrom(resultType);
     }
 
     protected Mono<Void> writeBody(Object body, ServerWebExchange exchange) {
