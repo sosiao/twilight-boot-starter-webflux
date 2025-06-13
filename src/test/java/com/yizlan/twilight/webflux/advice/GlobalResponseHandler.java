@@ -16,7 +16,6 @@
 
 package com.yizlan.twilight.webflux.advice;
 
-import com.yizlan.gelato.canonical.protocol.TerResult;
 import com.yizlan.twilight.webflux.annotation.AbstractGlobalResponseBodyResultHandler;
 import com.yizlan.twilight.webflux.autoconfigure.texture.HarmonyProperties;
 import com.yizlan.twilight.webflux.protocol.Result;
@@ -33,17 +32,17 @@ import java.util.List;
 
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class GlobalResponseHandler extends AbstractGlobalResponseBodyResultHandler<String, String, Object> {
+public class GlobalResponseHandler extends AbstractGlobalResponseBodyResultHandler<Result<Object>, String, String, Object> {
 
     public GlobalResponseHandler(List<HttpMessageWriter<?>> writers, RequestedContentTypeResolver resolver,
-                                 TerResult<String, String, Object> terResult, HarmonyProperties harmonyProperties) {
-        super(writers, resolver, terResult, harmonyProperties);
+                                 Result<Object> protocol, HarmonyProperties harmonyProperties) {
+        super(writers, resolver, protocol, harmonyProperties);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-        final TerResult<String, String, Object> emptyResult = terResult.success();
+        final Result<Object> objectResult = protocol.success();
         Object returnValue = result.getReturnValue();
         Object body;
         if (returnValue instanceof Mono) {
@@ -52,14 +51,14 @@ public class GlobalResponseHandler extends AbstractGlobalResponseBodyResultHandl
                         if (obj instanceof Result<?>) {
                             return obj;
                         }
-                        return terResult.success().data(obj);
+                        return protocol.success().data(obj);
                     })
-                    .defaultIfEmpty(emptyResult);
+                    .defaultIfEmpty(objectResult);
         } else if (returnValue instanceof Flux) {
             body = ((Flux<Object>) result.getReturnValue())
                     .collectList()
                     .map(this::wrap)
-                    .defaultIfEmpty(emptyResult);
+                    .defaultIfEmpty(objectResult);
         } else {
             body = this.wrap(returnValue);
         }
